@@ -146,7 +146,7 @@ class BayesClassifier:
     def load_file(self, filepath: str) -> str:
         """Loads text of given file
 
-        Args:
+        Args: 
             filepath - relative path to file to load
 
         Returns:
