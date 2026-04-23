@@ -142,9 +142,16 @@ class BayesClassifier:
         # individual feature
         pos_total = sum(self.pos_freqs.values())
         neg_total = sum(self.neg_freqs.values())
+
+        vocab = set(self.pos_freqs.values()).union(self.neg_freqs.keys())
+        vocab_size = len(vocab)
+
         # You do the negative portion
         # print(pos_total)
         # print(neg_total)
+
+        file = self.load_file("sorted_stoplist.txt")
+        stopwords = self.tokenize(file)
 
         # for each token in the text, calculate the probability of it occurring in a
         # postive document and in a negative document and add the logs of those to the
@@ -152,14 +159,15 @@ class BayesClassifier:
         # of each probability for add one smoothing (so that we never have a probability
         # of 0)
         for token in tokens:
-            pos_token_freq = self.pos_freqs.get(token, 0) + 1
-            neg_token_freq = self.neg_freqs.get(token, 0) + 1
+            if token not in stopwords:    
+                pos_freqs = self.pos_freqs.get(token, 0) + 1
+                neg_freqs = self.neg_freqs.get(token, 0) + 1
 
-            pos_score += math.log(pos_token_freq / pos_total)
-            neg_score += math.log(neg_token_freq / neg_total)
-        
-        print(f"positive score: {pos_score}")
-        print(f"negative score: {neg_score}")
+                pos_score += math.log(pos_freqs / (pos_denominator + vocab_size))
+                neg_score += math.log(neg_freqs / (neg_denominator + vocab_size))
+            
+        print(f"Positive Probability: {pos_score}")
+        print(f"Negative Probability: {neg_score}")
 
         # for debugging purposes, it may help to print the overall positive and negative
         # probabilities
@@ -312,3 +320,17 @@ if __name__ == "__main__":
     print(b.classify('rainy days are the worst'))
     print(b.classify('computer science is terrible'))
     
+    print("\nThe following is to test out the method with each groups responses")
+    print(b.classify('"Summer break is almost here.  I am super excited and I know that it''s going to be the best'))
+    print(b.classify("School is almost done. I can't wait for it to end"))
+    print(b.classify("I'm really proud of how much I improved this school year"))
+
+    print(b.classify("I am nervous that I won't do well on the AP tests. I have studied, but I don't think I'll do that well"))
+    print(b.classify("I wasted most of the school year playing games"))
+    print(b.classify("I procrastinated again, and it made everything harder"))
+
+    print(b.classify("I always mobile order ahead of time and my food and drinks are always fresh and hot (or iced). Manisha is always so kind and brightens my mornings!"))
+    print(b.classify("The burger was plentiful, tasted great, and with the complimentary free senior coffee I feel like I really got a fantastic meal at a fantastic price. I loved the friendly service also."))
+    
+    print(b.classify("This will probably be the last time I visit this location! Ordered through the app for a speedy pick up but the order wasn't ready. The bagels weren't the normal size but much smaller, more burnt and harder then ever! The staff here isn't polite!"))
+    print(b.classify("Service Is bad servers are worse. They don't know the meaning of good customer service. I don't believe in the customer is always right atleast respect should still be given. No wonder this place is filled with animosity. This is what represents Wendy's? the workers that gives service to consumers are rude, arrogant, and very disrespectful."))
